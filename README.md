@@ -41,7 +41,8 @@
 1. Run in terminal `node app.js`
 2. Open in Browser `http://localhost:3000/`
 
-
+## *Screenshort*  
+![Screenshot 2022-07-24 183508](https://user-images.githubusercontent.com/66620521/180648394-66616dc8-09a4-4c2a-921b-d97401abbd4f.png)
 
 ## *Live Demo*    
 
