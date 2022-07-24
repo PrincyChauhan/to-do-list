@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const _ = require("lodash");
 
 
 const date = require('./date');
@@ -29,6 +30,11 @@ const item3 = new Item({
 });
 
 const defaultItems = [item1, item2, item3];
+const listSchema = {
+    name: String,
+    items: [itemSchema]
+}
+const List = mongoose.model("List", listSchema)
 
 
 app.get('/', (req, res) => {
@@ -50,17 +56,57 @@ app.get('/', (req, res) => {
 
 app.post('/', (req, res) => {
     let itemName = req.body.newItem
-    const item =new Item({
-        name:itemName
+    let listName = req.body.list
+    const item = new Item({
+        name: itemName
     })
-    item.save();
-    res.redirect("/")
- 
+    if (listName === "Today") {
+        item.save();
+        res.redirect("/")
+    } else {
+        List.findOne({ name: listName }, (err, foundList) => {
+            foundList.items.push(item)
+            foundList.save()
+            res.redirect("/" + listName)
+        })
+    }
 })
 
-app.get('/work', (req, res) => {
-    res.render("list", { listTitle: "Work List", newItemList: workItems })
+app.post('/delete', (req, res) => {
+    const checkedItemId = req.body.checkbox;
+    let listName = req.body.listName;
+    if (listName == "Today") {
 
+        Item.findByIdAndRemove(checkedItemId, (err) => {
+            if (!err) {
+                res.redirect("/")
+            }
+        })
+    } else {
+        List.findOneAndUpdate({ name: listName }, { $pull: { items: { _id: checkedItemId } } }, (err, foundList) => {
+            if (!err) {
+                res.redirect("/" + listName)
+            }
+        })
+    }
+})
+
+app.get('/:customListName', (req, res) => {
+    const customListName = _.capitalize(req.params.customListName)
+    List.findOne({ name: customListName }, (err, foundList) => {
+        if (!err) {
+            if (!foundList) {
+                const list = new List({
+                    name: customListName,
+                    items: defaultItems
+                })
+                list.save()
+                res.redirect("/" + customListName)
+            } else {
+                res.render("list", { listTitle: foundList.name, newItemList: foundList.items })
+            }
+        }
+    })
 })
 
 app.listen(3000, () => {
