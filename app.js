@@ -11,7 +11,10 @@ app.use(bodyParser.urlencoded({ extenend: true }))
 app.use(express.static("public"))
 app.set("view engine", "ejs");
 
-mongoose.connect("mongodb://localhost:27017/toDOListDB", { useNewUrlParser: true });
+
+
+mongoose.connect("mongodb+srv://princy:princy@cluster0.2eqwn.mongodb.net/toDOListDB", { useNewUrlParser: true });
+
 const itemSchema = {
     name: String
 }
@@ -109,6 +112,13 @@ app.get('/:customListName', (req, res) => {
     })
 })
 
-app.listen(3000, () => {
-    console.log("Server is listing on Port no 3000")
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 3000;
+}
+
+
+
+app.listen(port, () => {
+    console.log("Server has running successfully")
 })
